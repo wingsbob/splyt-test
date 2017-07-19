@@ -53,6 +53,14 @@ describe('schedule', () => {
       ['16:30', '18:30']
     ]], 60)).to.equal(null)
   );
+  it('when using strange times', () =>
+    expect(schedule([[
+      ['9:00', '12:00'],
+      ['12:30', '13:00']
+    ], [
+      ['13:00', '14:43']
+    ]], 60)).to.equal('14:43')
+  );
   it('when we have a lot of attendees', () =>
     expect(schedule([[
       ['9:00', '12:00'],

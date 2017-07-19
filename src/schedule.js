@@ -8,10 +8,11 @@ const endOfDay = parseTime('19:00');
 const canMakeAppointment = (appointments, startTime, duration) =>
   appointments.some(([_, end], index) => {
     const [nextAppointmentStart] = (appointments[index + 1] || [endOfDay])
-    if (end <= startTime && startTime + duration <= nextAppointmentStart) return true;
+
+    return end <= startTime && startTime + duration <= nextAppointmentStart;
   });
 
-module.exports = (schedules, duration, timeResolution = 15) => {
+module.exports = (schedules, duration, timeResolution = 1) => {
   var meetingTime = parseTime('9:00');
   const schedulesInMinutes = schedules
     .map(appointments =>
