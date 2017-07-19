@@ -1,9 +1,9 @@
-const timeToMinutes = time => {
+const parseTime = time => {
   const [hours, minutes] = time.split(':').map(n => parseInt(n, 10));
   return 60 * hours + minutes;
 };
 
-const minutesToTime = totalMinutes => {
+const formatTime = totalMinutes => {
   if (totalMinutes === null) return null;
   const minutes = totalMinutes % 60;
   const hours = (totalMinutes - minutes) / 60;
@@ -12,6 +12,6 @@ const minutesToTime = totalMinutes => {
 };
 
 module.exports = {
-  timeToMinutes,
-  minutesToTime
+  parseTime,
+  formatTime
 };
