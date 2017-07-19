@@ -13,28 +13,35 @@ const formatTime = totalMinutes => {
 
 const endOfDay = parseTime('19:00');
 
-const canMakeAppointment = (appointments, startTime, duration) =>
-  appointments.some(([_, end], index) => {
-    const [nextAppointmentStart] = (appointments[index + 1] || [endOfDay])
+const meetingFitsInSchedules = (schedules, meetingTime, duration) => {
+  const meetingFitsInSchedule = appointments =>
+    appointments.some(([_, end], index) => {
+      const [nextAppointmentStart] = appointments[index + 1] || [endOfDay];
 
-    return end <= startTime && startTime + duration <= nextAppointmentStart;
-  });
+      return end <= meetingTime && meetingTime + duration <= nextAppointmentStart;
+    });
 
-module.exports = (schedules, duration, timeResolution = 1) => {
-  var meetingTime = parseTime('9:00');
-  const schedulesInMinutes = schedules
+  return schedules.every(appointments =>
+    appointments.length === 0 || meetingFitsInSchedule(appointments)
+  );
+};
+
+const parseScheduleTimes = schedules =>
+  schedules
     .map(appointments =>
       appointments.map(appointment =>
         appointment.map(parseTime)
       )
     );
 
-  while (meetingTime + duration < endOfDay) {
-    const canEveryoneMakeIt = schedulesInMinutes.every(appointments =>
-      appointments.length === 0 || canMakeAppointment(appointments, meetingTime, duration)
-    );
+module.exports = (schedules, duration, timeResolution = 1) => {
+  var meetingTime = parseTime('9:00');
+  const schedulesInMinutes = parseScheduleTimes(schedules);
 
-    if (canEveryoneMakeIt) return formatTime(meetingTime);
+  while (meetingTime + duration < endOfDay) {
+    const everyoneCanAttend = meetingFitsInSchedules(schedulesInMinutes, meetingTime, duration);
+
+    if (everyoneCanAttend) return formatTime(meetingTime);
     meetingTime += timeResolution;
   }
 
