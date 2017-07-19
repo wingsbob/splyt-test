@@ -18,7 +18,7 @@ const getAvailableTimeCalculator = (duration, earliestTime) =>
     if (meetingFitsBeforeFirstAppointment(earliestTime, duration, appointments))
       return earliestTime;
 
-    const [_, firstTime] = appointments
+    const appointment = appointments
       .find(([_, end], index) => {
         if (end < earliestTime) return false;
         if (!appointments[index + 1]) return true; // last appointment, can assume infinite duration
@@ -27,6 +27,10 @@ const getAvailableTimeCalculator = (duration, earliestTime) =>
 
         return start - end >= duration; // if it fits, it's good :)
       });
+
+    if (!appointment) return false;
+
+    const [_, firstTime] = appointment;
 
     if (firstTime + duration >= endOfDay) return null;
 
