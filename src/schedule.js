@@ -17,6 +17,7 @@ const getFirstAvailableTime = (appointments, duration) => {
     return start - end > duration ? end : null;
   }, null);
 
+
   if (firstTime === null) return firstTime;
 
   if (firstTime < startOfDay) return startOfDay;
@@ -27,6 +28,11 @@ const getFirstAvailableTime = (appointments, duration) => {
 
 module.exports = (schedules, duration) =>
   schedules
-    .map(appointments => appointments.map(appointment => appointment.map(timeToMinutes)))
-    .map(getFirstAvailableTime)
-    .map(minutesToTime)[0];
+    .map(appointments =>
+      minutesToTime(
+        getFirstAvailableTime(
+          appointments.map(appointment => appointment.map(timeToMinutes)),
+          duration
+        )
+      )
+    )[0];
