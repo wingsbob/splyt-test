@@ -28,15 +28,31 @@ const getAvailableTimeCalculator = duration =>
     return firstTime;
   };
 
+const canMakeAppointment = (appointments, startTime, duration) =>
+  appointments.find(([_, end], index) => {
+    const [nextAppointmentStart] = (appointments[index + 1] || [endOfDay])
+    if (end <= startTime && startTime + duration < nextAppointmentStart) return true;
+  });
+
 const appointmentsToMinutes = appointments =>
   appointments.map(appointment => appointment.map(timeToMinutes))
 
-module.exports = (schedules, duration) =>
-  schedules
-    .map(
-      compose(
-        appointmentsToMinutes,
-        getAvailableTimeCalculator(duration),
-        minutesToTime
-      )
-    )[0];
+module.exports = (schedules, duration) => {
+  const schedulesInMinutes = schedules.map(appointmentsToMinutes);
+  const firstSlots = schedulesInMinutes
+    .map(getAvailableTimeCalculator(duration));
+
+  const uniqueStarts = firstSlots
+    .reduce((uniques, curr) =>
+      uniques.includes(curr) ? uniques : uniques.concat(curr),
+      []
+    );
+
+  if (uniqueStarts.length === 1) return minutesToTime(firstSlots[0]);
+  return minutesToTime(
+    uniqueStarts.find(startTime =>
+      schedulesInMinutes.every(appointments =>
+        canMakeAppointment(appointments, startTime, duration)
+      ))
+    ) || null;
+}
