@@ -12,13 +12,13 @@ const getAvailableTimeCalculator = duration =>
     if (appointments.length === 0) return startOfDay;
 
     const firstTime = appointments.reduce((time, [_, end], index) => {
+      if (time !== null) return time;
       if (!appointments[index + 1]) return end;
 
       const [start] = appointments[index + 1] || [0];
 
       return start - end > duration ? end : null;
     }, null);
-
 
     if (firstTime === null) return firstTime;
 
