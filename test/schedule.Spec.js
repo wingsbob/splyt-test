@@ -18,6 +18,13 @@ describe('schedule', () => {
       ['15:00', '16:00']
     ]], 60)).to.equal('13:00')
   );
+  it('fits meetings in exactly', () =>
+    expect(schedule([[
+      ['9:00', '12:00'],
+      ['12:30', '13:00'],
+      ['14:00', '16:00']
+    ]], 60)).to.equal('13:00')
+  );
   it('returns the first slot which is available for both people', () =>
     expect(schedule([[
       ['9:00', '12:00'],

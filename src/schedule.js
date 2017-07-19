@@ -17,7 +17,7 @@ const getAvailableTimeCalculator = duration =>
 
       const [start] = appointments[index + 1] || [0];
 
-      return start - end > duration ? end : null;
+      return start - end >= duration ? end : null;
     }, null);
 
     if (firstTime === null) return firstTime;
