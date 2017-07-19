@@ -46,6 +46,8 @@ const findFirstAvailableAppointment = (duration, startTime, schedules) => {
   const firstSlots = schedules
     .map(getAvailableTimeCalculator(duration, startTime));
 
+  if (firstSlots.includes(null)) return null;
+
   const uniqueStarts = firstSlots
     .reduce((uniques, curr) =>
       uniques.includes(curr) ? uniques : uniques.concat(curr),
@@ -65,11 +67,9 @@ const findFirstAvailableAppointment = (duration, startTime, schedules) => {
   return findFirstAvailableAppointment(duration, uniqueStarts[uniqueStarts.length - 1], schedules);
 };
 
-module.exports = (schedules, duration) => {
-  const schedulesInMinutes = schedules.map(appointmentsToMinutes);
-  return findFirstAvailableAppointment(
+module.exports = (schedules, duration) =>
+  findFirstAvailableAppointment(
     duration,
     timeToMinutes('9:00'),
-    schedulesInMinutes
+    schedules.map(appointmentsToMinutes)
   );
-};
