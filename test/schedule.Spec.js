@@ -6,10 +6,10 @@ describe('schedule', () => {
     expect(schedule([[['9:00', '19:00']]], 60)).to.be.null
   );
   it('returns the start of the day for a single empty calendar', () =>
-    expect(schedule([[]]), 60).to.equal('9:00')
+    expect(schedule([[]], 60)).to.equal('9:00')
   );
   it('returns the start of the day for a multiple empty calendars', () =>
-    expect(schedule([[], [], []]), 60).to.equal('9:00')
+    expect(schedule([[], [], []], 60)).to.equal('9:00')
   );
   it('returns the first slot for a single person', () =>
     expect(schedule([[
