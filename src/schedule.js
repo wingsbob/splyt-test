@@ -3,25 +3,31 @@ const {
   minutesToTime
 } = require('./helpers');
 
-const startOfDay = timeToMinutes('9:00');
 const endOfDay = timeToMinutes('19:00');
 
-const getAvailableTimeCalculator = duration =>
+const hasNoAppointments = appointments =>
+  appointments.length === 0;
+
+const meetingFitsBeforeFirstAppointment = (earliestTime, duration, appointments) =>
+  earliestTime + duration < appointments[0][0]; //assume appointments to be in chronological order
+
+const getAvailableTimeCalculator = (duration, earliestTime) =>
   appointments => {
-    if (appointments.length === 0) return startOfDay;
+    if (hasNoAppointments(appointments)) return earliestTime; // no appointments
 
-    const firstTime = appointments.reduce((time, [_, end], index) => {
-      if (time !== null) return time;
-      if (!appointments[index + 1]) return end;
+    if (meetingFitsBeforeFirstAppointment(earliestTime, duration, appointments))
+      return earliestTime;
 
-      const [start] = appointments[index + 1] || [0];
+    const [_, firstTime] = appointments
+      .find(([_, end], index) => {
+        if (end < earliestTime) return false;
+        if (!appointments[index + 1]) return true; // last appointment, can assume infinite duration
 
-      return start - end >= duration ? end : null;
-    }, null);
+        const [start] = appointments[index + 1] || [0];
 
-    if (firstTime === null) return firstTime;
+        return start - end >= duration; // if it fits, it's good :)
+      });
 
-    if (firstTime < startOfDay) return startOfDay;
     if (firstTime + duration >= endOfDay) return null;
 
     return firstTime;
@@ -36,22 +42,34 @@ const canMakeAppointment = (appointments, startTime, duration) =>
 const appointmentsToMinutes = appointments =>
   appointments.map(appointment => appointment.map(timeToMinutes))
 
-module.exports = (schedules, duration) => {
-  const schedulesInMinutes = schedules.map(appointmentsToMinutes);
-  const firstSlots = schedulesInMinutes
-    .map(getAvailableTimeCalculator(duration));
+const findFirstAvailableAppointment = (duration, startTime, schedules) => {
+  const firstSlots = schedules
+    .map(getAvailableTimeCalculator(duration, startTime));
 
   const uniqueStarts = firstSlots
     .reduce((uniques, curr) =>
       uniques.includes(curr) ? uniques : uniques.concat(curr),
       []
-    );
+    )
+    .sort((a, b) => a - b);
 
-  if (uniqueStarts.length === 1) return minutesToTime(firstSlots[0]);
-  return minutesToTime(
+  if (uniqueStarts.length === 1) return minutesToTime(uniqueStarts[0]);
+  const availableSlot =
     uniqueStarts.find(startTime =>
-      schedulesInMinutes.every(appointments =>
+      schedules.every(appointments =>
         canMakeAppointment(appointments, startTime, duration)
-      ))
-    ) || null;
-}
+      ));
+
+  if (availableSlot) return minutesToTime(availableSlot);
+
+  return findFirstAvailableAppointment(duration, uniqueStarts[uniqueStarts.length - 1], schedules);
+};
+
+module.exports = (schedules, duration) => {
+  const schedulesInMinutes = schedules.map(appointmentsToMinutes);
+  return findFirstAvailableAppointment(
+    duration,
+    timeToMinutes('9:00'),
+    schedulesInMinutes
+  );
+};
