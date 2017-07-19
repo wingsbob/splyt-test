@@ -11,12 +11,7 @@ const minutesToTime = totalMinutes => {
   return `${hours}:${minutes >= 10 ? minutes : `0${minutes}`}`;
 };
 
-const compose = (...funcs) =>
-  (data) =>
-    funcs.reduce((result, func) => func(result), data);
-
 module.exports = {
   timeToMinutes,
-  minutesToTime,
-  compose
+  minutesToTime
 };

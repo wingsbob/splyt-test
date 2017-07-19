@@ -1,7 +1,6 @@
 const {
   timeToMinutes,
-  minutesToTime,
-  compose
+  minutesToTime
 } = require('./helpers');
 
 const startOfDay = timeToMinutes('9:00');
